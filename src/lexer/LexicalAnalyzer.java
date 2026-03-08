@@ -67,7 +67,7 @@ public class LexicalAnalyzer {
 
         // Invalid character
         throw new RuntimeException(
-                "Invalid character '" + current + "' at row " + row + ", column " + column
+                "Lexical Error: invalid character '" + current + "' at row " + row + ", column " + column
         );
     }
 
