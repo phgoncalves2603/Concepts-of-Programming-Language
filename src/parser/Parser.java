@@ -1,8 +1,6 @@
 package parser;
 
-import lexer.LexicalAnalyzer;
-import lexer.Token;
-import lexer.TokenType;
+import lexer.*;
 
 public class Parser {
 
@@ -11,120 +9,137 @@ public class Parser {
 
     public Parser(LexicalAnalyzer lexer) {
         this.lexer = lexer;
-        this.currentToken = lexer.getToken(); // load first token
+        currentToken = lexer.getToken();
     }
 
-    // Ensures the current token matches what we expect
-    private void eat(TokenType expected) {
+    private void match(TokenType expected) {
+
+        System.out.println("Trying to match: " + expected +
+                " | Current token: " + currentToken.getType());
+
         if (currentToken.getType() == expected) {
+            System.out.println("Matched: " + currentToken);
             currentToken = lexer.getToken();
         } else {
-            throw new RuntimeException(
-                    "Syntax error: expected " + expected +
-                            " but found " + currentToken.getType() +
-                            " at row " + currentToken.getRow() +
-                            ", column " + currentToken.getColumn()
-            );
+            error("Expected " + expected + " but found " + currentToken.getType());
         }
+
     }
 
-    // Entry point
-    public int parse() {
-        int value = expression();
+    private void error(String message) {
+        throw new RuntimeException(
+                message + " at row " + currentToken.getRow() +
+                        ", column " + currentToken.getColumn()
+        );
+    }
+
+    // Expression → Term Expression_Prime
+    public void expression() {
+        System.out.println("Enter <Expression>");
+        term();
+        expressionPrime();
+        System.out.println("Exit <Expression>");
+    }
+
+    // Expression_Prime → + Term Expression_Prime | - Term Expression_Prime | null
+    private void expressionPrime() {
+        System.out.println("Enter <Expression_Prime>");
+
+        if (currentToken.getType() == TokenType.ADDITION) {
+
+            match(TokenType.ADDITION);
+            term();
+            expressionPrime();
+
+        } else if (currentToken.getType() == TokenType.SUBTRACTION) {
+
+            match(TokenType.SUBTRACTION);
+            term();
+            expressionPrime();
+
+        }
+
+        System.out.println("Exit <Expression_Prime>");
+    }
+
+    // Term → Factor Term_Prime
+    private void term() {
+        System.out.println("Enter <Term>");
+        factor();
+        termPrime();
+        System.out.println("Exit <Term>");
+    }
+
+    // Term_Prime → * Factor Term_Prime | / Factor Term_Prime | null
+    private void termPrime() {
+        System.out.println("Enter <Term_Prime>");
+
+        if (currentToken.getType() == TokenType.MULTIPLICATION) {
+
+            match(TokenType.MULTIPLICATION);
+            factor();
+            termPrime();
+
+        } else if (currentToken.getType() == TokenType.DIVISION) {
+
+            match(TokenType.DIVISION);
+            factor();
+            termPrime();
+
+        }
+
+        System.out.println("Exit <Term_Prime>");
+    }
+
+    // Factor → ( Expression ) | - Expression | Number
+    private void factor() {
+        System.out.println("Enter <Factor>");
+
+        if (currentToken.getType() == TokenType.LPAREN) {
+
+            match(TokenType.LPAREN);
+            expression();
+            match(TokenType.RPAREN);
+
+        } else if (currentToken.getType() == TokenType.SUBTRACTION) {
+
+            match(TokenType.SUBTRACTION);
+            expression();
+
+        } else {
+
+            number();
+
+        }
+
+        System.out.println("Exit <Factor>");
+    }
+
+    // Number → INTEGER
+    private void number() {
+        System.out.println("Enter <Number>");
+
+        if (currentToken.getType() == TokenType.INTEGER) {
+            match(TokenType.INTEGER);
+        } else {
+            error("Expected INTEGER");
+        }
+
+        System.out.println("Exit <Number>");
+    }
+
+    public void parse() {
+
+        if (currentToken.getType() == TokenType.EOS) {
+            error("Empty expression");
+        }
+
+        expression();
 
         if (currentToken.getType() != TokenType.EOS) {
-            throw new RuntimeException(
-                    "Unexpected token after expression: " + currentToken.getLexeme()
-            );
+            error("Unexpected tokens after expression");
         }
 
-        return value;
-    }
-
-    // Expression → Term ExpressionPrime
-    private int expression() {
-        int value = term();
-        return expressionPrime(value);
-    }
-
-    // ExpressionPrime → + Term ExpressionPrime
-    //                 | - Term ExpressionPrime
-    //                 | ε
-    private int expressionPrime(int inherited) {
-        if (currentToken.getType() == TokenType.ADDITION) {
-            eat(TokenType.ADDITION);
-            int value = term();
-            return expressionPrime(inherited + value);
-        }
-
-        if (currentToken.getType() == TokenType.SUBTRACTION) {
-            eat(TokenType.SUBTRACTION);
-            int value = term();
-            return expressionPrime(inherited - value);
-        }
-
-        return inherited; // ε
-    }
-
-    // Term → Factor TermPrime
-    private int term() {
-        int value = factor();
-        return termPrime(value);
-    }
-
-    // TermPrime → * Factor TermPrime
-    //            | / Factor TermPrime
-    //            | ε
-    private int termPrime(int inherited) {
-        if (currentToken.getType() == TokenType.MULTIPLICATION) {
-            eat(TokenType.MULTIPLICATION);
-            int value = factor();
-            return termPrime(inherited * value);
-        }
-
-        if (currentToken.getType() == TokenType.DIVISION) {
-            eat(TokenType.DIVISION);
-            int value = factor();
-
-            if (value == 0) {
-                throw new ArithmeticException("Division by zero");
-            }
-
-            return termPrime(inherited / value);
-        }
-
-        return inherited; // ε
-    }
-
-    // Factor → ( Expression )
-    //        | - Factor
-    //        | Number
-    private int factor() {
-        if (currentToken.getType() == TokenType.LPAREN) {
-            eat(TokenType.LPAREN);
-            int value = expression();
-            eat(TokenType.RPAREN);
-            return value;
-        }
-
-        if (currentToken.getType() == TokenType.SUBTRACTION) {
-            eat(TokenType.SUBTRACTION);
-            return -factor(); // unary minus
-        }
-
-        return number();
-    }
-
-    // Number → Int-Lit
-    private int number() {
-        if (currentToken.getType() == TokenType.INTEGER) {
-            int value = Integer.parseInt(currentToken.getLexeme());
-            eat(TokenType.INTEGER);
-            return value;
-        }
-
-        throw new RuntimeException(
-                "Expected integer literal but found " + currentToken.getType()
-        );
+        System.out.println("Parsing completed successfully.");
     }
 }
