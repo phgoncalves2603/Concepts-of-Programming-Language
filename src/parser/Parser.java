@@ -13,7 +13,6 @@ public class Parser {
     }
 
     private void match(TokenType expected) {
-
         System.out.println("Trying to match: " + expected +
                 " | Current token: " + currentToken.getType());
 
@@ -23,7 +22,6 @@ public class Parser {
         } else {
             error("Expected " + expected + " but found " + currentToken.getType());
         }
-
     }
 
     private void error(String message) {
@@ -34,112 +32,126 @@ public class Parser {
     }
 
     // Expression → Term Expression_Prime
-    public void expression() {
+    private ExpressionNode expression() {
         System.out.println("Enter <Expression>");
-        term();
-        expressionPrime();
+        TermNode leftTerm = term();
+        ExpressionNode left = new UnaryExpressionNode(leftTerm);
+        left = expressionPrime(left);
         System.out.println("Exit <Expression>");
+        return left;
     }
 
     // Expression_Prime → + Term Expression_Prime | - Term Expression_Prime | null
-    private void expressionPrime() {
+    private ExpressionNode expressionPrime(ExpressionNode left) {
         System.out.println("Enter <Expression_Prime>");
 
         if (currentToken.getType() == TokenType.ADDITION) {
-
+            TokenType op = currentToken.getType();
             match(TokenType.ADDITION);
-            term();
-            expressionPrime();
+            TermNode right = term();
+            ExpressionNode newLeft = new BinaryExpressionNode(left, op, right);
+            System.out.println("Exit <Expression_Prime>");
+            return expressionPrime(newLeft);
 
         } else if (currentToken.getType() == TokenType.SUBTRACTION) {
-
+            TokenType op = currentToken.getType();
             match(TokenType.SUBTRACTION);
-            term();
-            expressionPrime();
-
+            TermNode right = term();
+            ExpressionNode newLeft = new BinaryExpressionNode(left, op, right);
+            System.out.println("Exit <Expression_Prime>");
+            return expressionPrime(newLeft);
         }
 
         System.out.println("Exit <Expression_Prime>");
+        return left;
     }
 
     // Term → Factor Term_Prime
-    private void term() {
+    private TermNode term() {
         System.out.println("Enter <Term>");
-        factor();
-        termPrime();
+        FactorNode leftFactor = factor();
+        TermNode left = new UnaryTermNode(leftFactor);
+        left = termPrime(left);
         System.out.println("Exit <Term>");
+        return left;
     }
 
     // Term_Prime → * Factor Term_Prime | / Factor Term_Prime | null
-    private void termPrime() {
+    private TermNode termPrime(TermNode left) {
         System.out.println("Enter <Term_Prime>");
 
         if (currentToken.getType() == TokenType.MULTIPLICATION) {
-
+            TokenType op = currentToken.getType();
             match(TokenType.MULTIPLICATION);
-            factor();
-            termPrime();
+            FactorNode right = factor();
+            TermNode newLeft = new BinaryTermNode(left, op, right);
+            System.out.println("Exit <Term_Prime>");
+            return termPrime(newLeft);
 
         } else if (currentToken.getType() == TokenType.DIVISION) {
-
+            TokenType op = currentToken.getType();
             match(TokenType.DIVISION);
-            factor();
-            termPrime();
-
+            FactorNode right = factor();
+            TermNode newLeft = new BinaryTermNode(left, op, right);
+            System.out.println("Exit <Term_Prime>");
+            return termPrime(newLeft);
         }
 
         System.out.println("Exit <Term_Prime>");
+        return left;
     }
 
-    // Factor → ( Expression ) | - Expression | Number
-    private void factor() {
+    // Factor → ( Expression ) | - Factor | Number
+    private FactorNode factor() {
         System.out.println("Enter <Factor>");
 
-        if (currentToken.getType() == TokenType.LPAREN) {
+        FactorNode node;
 
+        if (currentToken.getType() == TokenType.LPAREN) {
             match(TokenType.LPAREN);
-            expression();
+            ExpressionNode expr = expression();
             match(TokenType.RPAREN);
+            node = new ParenthesizedFactorNode(expr);
 
         } else if (currentToken.getType() == TokenType.SUBTRACTION) {
-
             match(TokenType.SUBTRACTION);
-            expression();
+            node = new NegativeFactorNode(factor());
 
         } else {
-
-            number();
-
+            node = number();
         }
 
         System.out.println("Exit <Factor>");
+        return node;
     }
 
     // Number → INTEGER
-    private void number() {
+    private NumberNode number() {
         System.out.println("Enter <Number>");
 
         if (currentToken.getType() == TokenType.INTEGER) {
+            int value = Integer.parseInt(currentToken.getLexeme());
             match(TokenType.INTEGER);
+            System.out.println("Exit <Number>");
+            return new NumberNode(value);
         } else {
             error("Expected INTEGER");
+            return null;
         }
-
-        System.out.println("Exit <Number>");
     }
 
-    public void parse() {
-
+    public ParseTree parse() {
         if (currentToken.getType() == TokenType.EOS) {
             error("Empty expression");
         }
 
-        expression();
+        ExpressionNode root = expression();
 
         if (currentToken.getType() != TokenType.EOS) {
             error("Unexpected tokens after expression");
         }
 
         System.out.println("Parsing completed successfully.");
+        return new ParseTree(root);
     }
 }

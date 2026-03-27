@@ -1,2 +1,5 @@
-package parser;public class ExpressionNode {
+package parser;
+
+public abstract class ExpressionNode {
+    public abstract int evaluate();
 }

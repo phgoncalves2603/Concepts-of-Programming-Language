@@ -1,2 +1,4 @@
-package parser;public class FactorNode {
+package parser;
+
+public abstract class FactorNode extends ExpressionNode {
 }
