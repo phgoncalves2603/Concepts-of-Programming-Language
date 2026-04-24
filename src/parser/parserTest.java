@@ -9,14 +9,14 @@ public class parserTest {
     public static void main(String[] args) throws Exception {
 
         // Check if input file is provided
-//        if (args.length == 0) {
-//            System.out.println("Error: No input file provided.");
-//            System.out.println("Usage: java parser.parserTest <inputfile>");
-//            return;
-//        }
+        if (args.length == 0) {
+            System.out.println("Error: No input file provided.");
+            System.out.println("Usage: java parser.parserTest <inputfile>");
+            return;
+        }
 
         // Read entire file as string
-        String code = Files.readString(Path.of("C:\\Users\\guigu\\Documents\\learning docker\\Learning Docker\\Lexical analyzer\\src\\input.txt"));
+        String code = Files.readString(Path.of(args[0]));
 
         // Create lexer and parser
         LexicalAnalyzer lexer = new LexicalAnalyzer(code);
