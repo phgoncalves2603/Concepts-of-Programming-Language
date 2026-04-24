@@ -24,7 +24,8 @@ public class Parser {
 
     private void error(String message) {
         throw new RuntimeException(
-                message + " at row " + currentToken.getRow() +
+                "Syntax Error: " + message +
+                        " at row " + currentToken.getRow() +
                         ", column " + currentToken.getColumn()
         );
     }
@@ -61,13 +62,17 @@ public class Parser {
             return readStatement();
         }
 
-        error("Invalid statement");
+        error("Invalid statement. Expected assignment, print, or read");
         return null;
     }
 
     private StatementNode assignmentStatement() {
         String id = currentToken.getLexeme();
         match(TokenType.ID);
+
+        if (currentToken.getType() != TokenType.ASSIGNMENT) {
+            error("Expected '=' after identifier");
+        }
 
         match(TokenType.ASSIGNMENT);
 
@@ -79,6 +84,10 @@ public class Parser {
     private StatementNode printStatement() {
         match(TokenType.PRINT);
 
+        if (currentToken.getType() != TokenType.ID) {
+            error("Expected identifier after 'print'");
+        }
+
         String id = currentToken.getLexeme();
         match(TokenType.ID);
 
@@ -88,6 +97,10 @@ public class Parser {
     private StatementNode readStatement() {
         match(TokenType.READ);
 
+        if (currentToken.getType() != TokenType.ID) {
+            error("Expected identifier after 'read'");
+        }
+
         String id = currentToken.getLexeme();
         match(TokenType.ID);
 
@@ -95,17 +108,15 @@ public class Parser {
     }
 
     // =========================
-    // EXPRESSIONS (your original logic)
+    // EXPRESSIONS
     // =========================
 
-    // Expression → Term Expression_Prime
     private ExpressionNode expression() {
         TermNode leftTerm = term();
         ExpressionNode left = new UnaryExpressionNode(leftTerm);
         return expressionPrime(left);
     }
 
-    // Expression_Prime → + Term Expression_Prime | - Term Expression_Prime | null
     private ExpressionNode expressionPrime(ExpressionNode left) {
 
         if (currentToken.getType() == TokenType.ADDITION) {
@@ -131,14 +142,12 @@ public class Parser {
         return left;
     }
 
-    // Term → Factor Term_Prime
     private TermNode term() {
         FactorNode leftFactor = factor();
         TermNode left = new UnaryTermNode(leftFactor);
         return termPrime(left);
     }
 
-    // Term_Prime → * Factor Term_Prime | / Factor Term_Prime | null
     private TermNode termPrime(TermNode left) {
 
         if (currentToken.getType() == TokenType.MULTIPLICATION) {
@@ -164,7 +173,6 @@ public class Parser {
         return left;
     }
 
-    // Factor → ( Expression ) | - Factor | Number | ID
     private FactorNode factor() {
 
         if (currentToken.getType() == TokenType.LPAREN) {
@@ -191,7 +199,7 @@ public class Parser {
             return new IdNode(id);
         }
 
-        error("Expected factor");
+        error("Expected factor (number, identifier, or expression)");
         return null;
     }
 

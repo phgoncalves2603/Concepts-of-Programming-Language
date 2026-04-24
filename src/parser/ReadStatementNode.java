@@ -14,9 +14,10 @@ public class ReadStatementNode extends StatementNode {
         Scanner sc = new Scanner(System.in);
 
         if (!sc.hasNextInt()) {
-            throw new RuntimeException("Input must be an integer");
+            throw new RuntimeException("Runtime Error: Input must be an integer");
         }
 
-        memory.set(id, sc.nextInt());
+        int value = sc.nextInt();
+        memory.set(id, value);
     }
 }
