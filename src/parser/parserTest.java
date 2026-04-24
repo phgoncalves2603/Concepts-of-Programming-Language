@@ -8,20 +8,24 @@ public class parserTest {
 
     public static void main(String[] args) throws Exception {
 
-        if (args.length == 0) {
-            System.out.println("Error: No input file provided.\n");
-            System.out.println("Usage: java parser.parserTest <inputfile>");
-            System.out.println("Example: java parser.parserTest input.txt");
-            return;
-        }
+        // Check if input file is provided
+//        if (args.length == 0) {
+//            System.out.println("Error: No input file provided.");
+//            System.out.println("Usage: java parser.parserTest <inputfile>");
+//            return;
+//        }
 
-        String code = Files.readString(Path.of(args[0]));
+        // Read entire file as string
+        String code = Files.readString(Path.of("C:\\Users\\guigu\\Documents\\learning docker\\Learning Docker\\Lexical analyzer\\src\\input.txt"));
 
+        // Create lexer and parser
         LexicalAnalyzer lexer = new LexicalAnalyzer(code);
-
         Parser parser = new Parser(lexer);
-        ParseTree tree = parser.parse();
-        System.out.println("Result = " + tree.evaluate());
 
+        // Parse program
+        ParseTree tree = parser.parse();
+
+        // Execute program (IMPORTANT: replaces evaluate())
+        tree.execute();
     }
 }

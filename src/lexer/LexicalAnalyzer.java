@@ -14,7 +14,6 @@ public class LexicalAnalyzer {
     }
 
     public Token getToken() {
-        // Skip whitespace
         while (index < source.length() && Character.isWhitespace(source.charAt(index))) {
             if (source.charAt(index) == '\n') {
                 row++;
@@ -25,7 +24,6 @@ public class LexicalAnalyzer {
             index++;
         }
 
-        // End of source
         if (index >= source.length()) {
             return new Token(TokenType.EOS, "EOS", row, column);
         }
@@ -33,41 +31,49 @@ public class LexicalAnalyzer {
         char current = source.charAt(index);
         int startColumn = column;
 
-        // Single-character tokens
         switch (current) {
-            case '+':
-                advance();
-                return new Token(TokenType.ADDITION, "+", row, startColumn);
-            case '-':
-                advance();
-                return new Token(TokenType.SUBTRACTION, "-", row, startColumn);
-            case '*':
-                advance();
-                return new Token(TokenType.MULTIPLICATION, "*", row, startColumn);
-            case '/':
-                advance();
-                return new Token(TokenType.DIVISION, "/", row, startColumn);
-            case '(':
-                advance();
-                return new Token(TokenType.LPAREN, "(", row, startColumn);
-            case ')':
-                advance();
-                return new Token(TokenType.RPAREN, ")", row, startColumn);
+            case '+': advance(); return new Token(TokenType.ADDITION, "+", row, startColumn);
+            case '-': advance(); return new Token(TokenType.SUBTRACTION, "-", row, startColumn);
+            case '*': advance(); return new Token(TokenType.MULTIPLICATION, "*", row, startColumn);
+            case '/': advance(); return new Token(TokenType.DIVISION, "/", row, startColumn);
+            case '(': advance(); return new Token(TokenType.LPAREN, "(", row, startColumn);
+            case ')': advance(); return new Token(TokenType.RPAREN, ")", row, startColumn);
+            case '=': advance(); return new Token(TokenType.ASSIGNMENT, "=", row, startColumn);
         }
 
-        // Integer literal
+        // INTEGER
         if (Character.isDigit(current)) {
             StringBuilder number = new StringBuilder();
+
             while (index < source.length() && Character.isDigit(source.charAt(index))) {
                 number.append(source.charAt(index));
                 advance();
             }
+
             return new Token(TokenType.INTEGER, number.toString(), row, startColumn);
         }
 
-        // Invalid character
+        // IDENTIFIER / KEYWORDS
+        if (Character.isLetter(current)) {
+            StringBuilder id = new StringBuilder();
+
+            while (index < source.length() &&
+                    Character.isLetterOrDigit(source.charAt(index))) {
+                id.append(source.charAt(index));
+                advance();
+            }
+
+            String lexeme = id.toString().toLowerCase();
+
+            if (lexeme.equals("print")) return new Token(TokenType.PRINT, lexeme, row, startColumn);
+            if (lexeme.equals("read")) return new Token(TokenType.READ, lexeme, row, startColumn);
+
+            return new Token(TokenType.ID, lexeme, row, startColumn);
+        }
+
         throw new RuntimeException(
-                "Lexical Error: invalid character '" + current + "' at row " + row + ", column " + column
+                "Lexical Error: invalid character '" + current +
+                        "' at row " + row + ", column " + column
         );
     }
 

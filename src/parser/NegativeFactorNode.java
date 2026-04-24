@@ -8,7 +8,7 @@ public class NegativeFactorNode extends FactorNode {
     }
 
     @Override
-    public int evaluate() {
-        return -factor.evaluate();
+    public int evaluate(Memory memory) {
+        return -factor.evaluate(memory);
     }
 }

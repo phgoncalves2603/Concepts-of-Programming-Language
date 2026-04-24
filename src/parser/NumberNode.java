@@ -8,7 +8,7 @@ public class NumberNode extends FactorNode {
     }
 
     @Override
-    public int evaluate() {
+    public int evaluate(Memory memory) {
         return value;
     }
 }

@@ -1,17 +1,19 @@
 package parser;
 
+import java.util.List;
+
 public class ParseTree {
-    private ExpressionNode expressionNode;
+    private List<StatementNode> statements;
 
-    public ParseTree(ExpressionNode expressionNode) {
-        this.expressionNode = expressionNode;
+    public ParseTree(List<StatementNode> statements) {
+        this.statements = statements;
     }
 
-    public int evaluate() {
-        return expressionNode.evaluate();
-    }
+    public void execute() {
+        Memory memory = new Memory();
 
-    public ExpressionNode getExpressionNode() {
-        return expressionNode;
+        for (StatementNode stmt : statements) {
+            stmt.execute(memory);
+        }
     }
 }

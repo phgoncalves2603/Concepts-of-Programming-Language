@@ -14,12 +14,12 @@ public class BinaryTermNode extends TermNode {
     }
 
     @Override
-    public int evaluate() {
+    public int evaluate(Memory memory) {
         switch (operator) {
             case MULTIPLICATION:
-                return left.evaluate() * right.evaluate();
+                return left.evaluate(memory) * right.evaluate(memory);
             case DIVISION:
-                return left.evaluate() / right.evaluate();
+                return left.evaluate(memory) / right.evaluate(memory);
             default:
                 throw new RuntimeException("Invalid term operator: " + operator);
         }

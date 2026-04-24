@@ -8,7 +8,7 @@ public class ParenthesizedFactorNode extends FactorNode {
     }
 
     @Override
-    public int evaluate() {
-        return expression.evaluate();
+    public int evaluate(Memory memory) {
+        return expression.evaluate(memory);
     }
 }

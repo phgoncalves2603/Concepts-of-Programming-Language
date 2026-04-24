@@ -8,7 +8,7 @@ public class UnaryExpressionNode extends ExpressionNode {
     }
 
     @Override
-    public int evaluate() {
-        return term.evaluate();
+    public int evaluate(Memory memory) {
+        return term.evaluate(memory);
     }
 }

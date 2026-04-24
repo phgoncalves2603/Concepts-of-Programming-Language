@@ -8,6 +8,12 @@ public enum TokenType {
         DIVISION,        // /
         LPAREN,          // (
         RPAREN,          // )
+
         INTEGER,         // integer literal
-        EOS              // end of string
+        EOS,             // end of string
+        ASSIGNMENT,
+        ID,
+
+        PRINT,
+        READ,
 }
