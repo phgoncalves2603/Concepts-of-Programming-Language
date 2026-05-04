@@ -15,19 +15,11 @@ public class BinaryTermNode extends TermNode {
 
     @Override
     public int evaluate(Memory memory) {
-        int leftVal = left.evaluate(memory);
-        int rightVal = right.evaluate(memory);
-
         switch (operator) {
             case MULTIPLICATION:
-                return leftVal * rightVal;
-
+                return left.evaluate(memory) * right.evaluate(memory);
             case DIVISION:
-                if (rightVal == 0) {
-                    throw new RuntimeException("Runtime Error: Division by zero");
-                }
-                return leftVal / rightVal;
-
+                return left.evaluate(memory) / right.evaluate(memory);
             default:
                 throw new RuntimeException("Invalid term operator: " + operator);
         }
